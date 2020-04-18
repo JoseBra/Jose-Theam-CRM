@@ -15,6 +15,6 @@ class CustomerService(
 ) {
 
     fun createCustomer(name: String, surname: String): Customer {
-        return customerRepository.save(Customer(name, surname, CustomerID(idGenerator.generate())))
+        return customerRepository.save(Customer(CustomerID(idGenerator.generate()), name, surname))
     }
 }

@@ -31,7 +31,7 @@ class CustomerControllerTest {
 
     @Test
     fun `it should be able to create a customer with correct parameters`() {
-        val testCustomer = Customer("testCustomer", "anySurname", CustomerID("anyId"))
+        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
 
         whenever(customerService.createCustomer(any(), any())).thenReturn(testCustomer)
 

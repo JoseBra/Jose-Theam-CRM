@@ -34,7 +34,7 @@ class CustomerServiceTest {
 
     @Test
     fun `it should create a new customer`() {
-        val expectedCustomer = Customer("name", "surname", CustomerID("testId"))
+        val expectedCustomer = Customer(CustomerID("testId"), "name", "surname")
 
         every { customerRepository.save(expectedCustomer) } returns expectedCustomer
 
