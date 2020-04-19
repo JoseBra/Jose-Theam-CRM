@@ -50,7 +50,7 @@ class CustomerControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testCustomer.name))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.surname").value(testCustomer.surname))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(testCustomer.customerId!!.id))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(testCustomer.customerId.id))
     }
 
     @Test

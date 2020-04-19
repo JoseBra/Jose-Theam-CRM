@@ -38,6 +38,6 @@ data class CustomerResponse(
 ) {
     companion object {
         fun fromCustomer(customer: Customer) =
-                CustomerResponse(customer.name, customer.surname, customer.customerId?.id ?: "")
+                CustomerResponse(customer.name, customer.surname, customer.customerId.id)
     }
 }
