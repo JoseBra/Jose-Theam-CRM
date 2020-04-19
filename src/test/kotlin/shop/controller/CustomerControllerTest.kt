@@ -52,4 +52,20 @@ class CustomerControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.surname").value(testCustomer.surname))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(testCustomer.customerId!!.id))
     }
+
+    @Test
+    fun `it should answer with 400 when post body params are incorrect`() {
+        val invalidCreateCustomerRequest = JSONObject()
+                .put("name", "anyName")
+                .put("tomato", "wrongThing")
+
+        val request = MockMvcRequestBuilders
+                .post("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidCreateCustomerRequest.toString())
+
+        mockMvc.perform(request)
+                .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
 }
