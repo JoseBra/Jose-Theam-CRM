@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import shop.model.Customer
 import shop.model.CustomerID
+import shop.repository.CustomerRepository
 import shop.utils.IdGenerator
 
 @Service

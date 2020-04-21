@@ -7,7 +7,7 @@ import javax.persistence.*
 @Table(name = "Users") //User is a reserved word in PSQL :(
 data class User(
         @EmbeddedId
-        val customerId: UserID,
+        val userId: UserID,
         val username: String,
         val password: String,
         @ElementCollection

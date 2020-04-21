@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import shop.model.Customer
 import shop.model.CustomerID
+import shop.repository.CustomerRepository
 import shop.utils.IdGenerator
 
 @ExtendWith(MockKExtension::class)
