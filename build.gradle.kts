@@ -19,6 +19,8 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("io.jsonwebtoken:jjwt:0.9.1")
     implementation("org.postgresql:postgresql:42.2.12")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.flywaydb:flyway-core")
@@ -33,6 +35,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.14.0")
     testImplementation("org.testcontainers:postgresql:1.14.0")
     testImplementation("org.testcontainers:junit-jupiter:1.14.0")
+    testImplementation("org.springframework.security:spring-security-test")
 
 }
 
