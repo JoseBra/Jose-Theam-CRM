@@ -17,7 +17,10 @@ class UserController {
     @Autowired
     private lateinit var userService: UserService
 
-    @PostMapping("/users")
+    @PostMapping(
+            "/users",
+            consumes = ["application/json"],
+            produces = ["application/json"])
     @PreAuthorize("hasRole('ADMIN')")
     fun createUser(
             @RequestBody request: CreateUserRequest

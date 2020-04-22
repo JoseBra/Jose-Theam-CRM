@@ -16,7 +16,10 @@ class AuthenticationController {
     @Autowired
     lateinit var authenticationService: AuthenticationService
 
-    @PostMapping("/authentication/login")
+    @PostMapping(
+            "/authentication/login",
+            consumes = ["application/json"],
+            produces = ["application/json"])
     fun login(
             @RequestBody loginRequest: LoginRequest
     ): ResponseEntity<String> {

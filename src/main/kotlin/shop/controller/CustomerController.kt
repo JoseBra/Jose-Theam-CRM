@@ -16,7 +16,10 @@ class CustomerController {
     @Autowired
     private lateinit var customerService: CustomerService
 
-    @PostMapping("/customers")
+    @PostMapping(
+            "/customers",
+            consumes = ["application/json"],
+            produces = ["application/json"])
     @PreAuthorize("hasRole('USER')")
     fun createCustomer(
             @RequestBody request: CreateCustomerRequest
