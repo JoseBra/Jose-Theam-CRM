@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "bec0a360-d62c-410e-a6b0-8b921b10dc20",
+    "name": "Shop CRM",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\"name\": \"Alex\",\n\"surname\": \"Sanchez\"\n}"
+        },
+        "url": {
+          "raw": "localhost:8080/customers",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"username\": \"testUser\",\n\t\"password\": \"tomato\",\n\t\"roles\": [\n\t\t\"ROLE_USER\"\n\t\t]\n}"
+        },
+        "url": {
+          "raw": "localhost:8080/users",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"username\":\"admin\",\n\t\"password\":\"admin\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "localhost:8080/authentication/login/",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "authentication",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOlt7ImF1dGhvcml0eSI6IlJPTEVfVVNFUiJ9LHsiYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaWF0IjoxNTg3NTk2OTExLCJleHAiOjE1ODc2MDA1MTF9.L-APfyBhZuErTILQuEwiIQZu9kVpFRkbol4ekX42JPo",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "4db4ab68-c5db-47fe-b060-6d248c6ded58",
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "1e175077-7453-43fe-81c1-575c9b0549e7",
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {}
+}

@@ -24,3 +24,7 @@ This project is being developed with:
 - This project is using TestContainers, which will spin up a PSQLContainer at the 
 start of the test cycle using a random port.
 1) Run ```./gradlew test```
+
+## Documentation
+
+You can find some examples to the different API endpoints under ``/docs/postman``.
