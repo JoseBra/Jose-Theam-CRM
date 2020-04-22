@@ -22,7 +22,9 @@ class AuthenticationController {
     ): ResponseEntity<String> {
         return try {
             val generatedToken = authenticationService.login(loginRequest.username, loginRequest.password)
-            ResponseEntity.status(HttpStatus.OK).body(generatedToken)
+            ResponseEntity.status(HttpStatus.OK).body(
+                    jacksonObjectMapper().createObjectNode().put("token", generatedToken).toString()
+            )
         } catch (ex: JwtValidationException) {
             ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
