@@ -1,5 +1,6 @@
 package shop.controller
 
+import arrow.core.Either
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.json.JSONObject
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import shop.model.Customer
 import shop.model.CustomerID
 import shop.service.CustomerService
+import shop.utils.CustomerNotFoundException
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
@@ -123,6 +125,41 @@ class CustomerControllerTest {
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.items").isArray)
                 .andExpect(jsonPath("$.items").isEmpty)
+    }
 
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should retrieve details for a customer given its id`() {
+        val expectedCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
+        whenever(
+                customerService.retrieveDetails(expectedCustomer.customerId)
+        )
+                .thenReturn(Either.right(expectedCustomer))
+
+        val request = MockMvcRequestBuilders
+                .get("/customers/${expectedCustomer.customerId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.customerId").value(expectedCustomer.customerId.id))
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should respond 404 when customer is not found`() {
+        whenever(
+                customerService.retrieveDetails(any())
+        )
+                .thenReturn(Either.left(CustomerNotFoundException("")))
+
+        val request = MockMvcRequestBuilders
+                .get("/customers/1234")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound)
     }
 }

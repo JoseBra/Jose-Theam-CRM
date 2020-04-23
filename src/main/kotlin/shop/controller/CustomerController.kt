@@ -1,14 +1,13 @@
 package shop.controller
 
+import arrow.core.Either
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import shop.model.Customer
+import shop.model.CustomerID
 import shop.service.CustomerService
 
 @RestController
@@ -40,6 +39,23 @@ class CustomerController {
         return ResponseEntity
                 .ok()
                 .body(ListCustomerResponse(allCustomerResponse))
+    }
+
+    @GetMapping(
+            "/customers/{id}",
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('USER')")
+    fun retrieveDetails(
+            @PathVariable id: String
+    ): ResponseEntity<CustomerResponse> {
+        val findCustomerAttempt = customerService.retrieveDetails(CustomerID(id))
+
+        when (findCustomerAttempt) {
+            is Either.Right ->
+                return ResponseEntity.ok().body(CustomerResponse.fromCustomer(findCustomerAttempt.b))
+            is Either.Left ->
+                throw findCustomerAttempt.a
+        }
     }
 
 }

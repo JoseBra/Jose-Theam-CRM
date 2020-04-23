@@ -1,5 +1,7 @@
 package shop.service
 
+import arrow.core.Either
+import io.kotest.assertions.arrow.either.shouldBeLeft
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -14,6 +16,7 @@ import shop.model.Customer
 import shop.model.CustomerID
 import shop.repository.CustomerRepository
 import shop.utils.IdGenerator
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class CustomerServiceTest {
@@ -51,6 +54,22 @@ class CustomerServiceTest {
         every { customerRepository.findAll() } returns listOf(expectedCustomer, expectedCustomer)
 
         assertEquals(listOf(expectedCustomer, expectedCustomer), service.listAllCustomers())
+    }
+
+    @Test
+    fun `it should retrieve details for an existing customer`() {
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.of(expectedCustomer)
+
+        assertEquals(expectedCustomer, (service.retrieveDetails(expectedCustomer.customerId) as Either.Right).b)
+    }
+
+    @Test
+    fun `it should return an error when customer is not found`() {
+        every { customerRepository.findById(any()) } returns Optional.empty()
+
+        val findCustomerAttempt = service.retrieveDetails(expectedCustomer.customerId)
+
+        findCustomerAttempt.shouldBeLeft()
     }
 
     private val expectedCustomer = Customer(CustomerID("testId"), "name", "surname")
