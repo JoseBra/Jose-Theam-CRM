@@ -17,7 +17,7 @@ class CustomUserDetails : UserDetailsService {
         val user = userRepository.findByUsername(username)
         return User
                 .withUsername(username)
-                .password(user.password)
+                .password(user!!.password)
                 .authorities(user.roles)
                 .accountExpired(false)
                 .accountLocked(false)

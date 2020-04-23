@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import shop.config.security.JwtValidationException
 import shop.service.AuthenticationService
 
 
@@ -28,16 +28,16 @@ class AuthenticationController {
             ResponseEntity.status(HttpStatus.OK).body(
                     jacksonObjectMapper().createObjectNode().put("token", generatedToken).toString()
             )
-        } catch (ex: JwtValidationException) {
-            ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(jacksonObjectMapper().createObjectNode().put("error", ex.message).toString())
+        } catch (ex: FailedLoginException) {
+            throw ex
         }
     }
-
 }
 
 data class LoginRequest(
         val username: String,
         val password: String
 )
+
+@ResponseStatus(HttpStatus.UNAUTHORIZED, reason = "Invalid username/password provided.")
+class FailedLoginException(message: String) : Exception(message)

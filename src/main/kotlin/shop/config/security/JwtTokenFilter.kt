@@ -1,5 +1,7 @@
 package shop.config.security
 
+import io.jsonwebtoken.JwtException
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
@@ -20,9 +22,9 @@ class JwtTokenFilter(
                     SecurityContextHolder.getContext().authentication = auth
                 }
             }
-        } catch (ex: JwtValidationException) {
+        } catch (ex: JwtException) {
             SecurityContextHolder.clearContext()
-            httpServletResponse.sendError(ex.status.value(), ex.message)
+            httpServletResponse.sendError(HttpStatus.UNAUTHORIZED.value(), ex.message)
             return
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse)

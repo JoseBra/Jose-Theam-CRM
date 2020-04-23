@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.ResponseStatus
 import shop.model.Role
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -61,14 +62,14 @@ class JwtTokenProvider(
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token)
             true
         } catch (e: JwtException) {
-            throw JwtValidationException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw JwtExpiredOrInvalidToken("Expired or invalid JWT token")
         } catch (e: IllegalArgumentException) {
-            throw JwtValidationException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR)
+            throw JwtExpiredOrInvalidToken("Expired or invalid JWT token")
         }
     }
 }
 
-class JwtValidationException(
-        override val message: String,
-        val status: HttpStatus
-) : Exception(message)
+@ResponseStatus(HttpStatus.UNAUTHORIZED, reason = "Expired or invalid JWT token.")
+class JwtExpiredOrInvalidToken(
+        override val message: String
+) : JwtException(message)
