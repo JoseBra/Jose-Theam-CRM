@@ -1,5 +1,6 @@
 package shop.service
 
+import arrow.core.Either
 import io.kotest.assertions.arrow.either.shouldBeLeft
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -44,6 +45,8 @@ class UserServiceTest {
                 listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
         )
 
+        every { userRepository.findByUsername(expectedUser.username) } returns null
+
         every { userRepository.save(expectedUser) } returns expectedUser
 
         every { idGenerator.generate() } returns expectedUser.userId.id
@@ -55,7 +58,7 @@ class UserServiceTest {
         verify { passwordEncoder.encode(expectedUser.password) }
         verify { idGenerator.generate() }
 
-        assertEquals(expectedUser, createdCustomer)
+        assertEquals(expectedUser, (createdCustomer as Either.Right).b)
     }
 
     @Test
@@ -67,8 +70,7 @@ class UserServiceTest {
                 listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
         )
 
-        every { userRepository.findByUsername("username") } returns expectedUser
-
+        every { userRepository.findByUsername(expectedUser.username) } returns expectedUser
 
         service.createUser(expectedUser.username, expectedUser.password, expectedUser.roles)
                 .shouldBeLeft()

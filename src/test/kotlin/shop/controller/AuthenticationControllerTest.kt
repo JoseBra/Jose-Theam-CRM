@@ -80,6 +80,5 @@ class AuthenticationControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized)
-                .andExpect(jsonPath("$.error").isNotEmpty)
     }
 }
