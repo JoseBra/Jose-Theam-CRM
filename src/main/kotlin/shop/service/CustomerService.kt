@@ -10,9 +10,9 @@ import shop.utils.IdGenerator
 @Service
 class CustomerService(
         @Autowired
-        var customerRepository: CustomerRepository,
+        val customerRepository: CustomerRepository,
         @Autowired
-        var idGenerator: IdGenerator
+        val idGenerator: IdGenerator
 ) {
 
     fun createCustomer(name: String, surname: String): Customer {
