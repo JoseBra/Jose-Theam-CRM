@@ -26,6 +26,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("io.arrow-kt:arrow-core:0.10.5")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -36,6 +37,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.14.0")
     testImplementation("org.testcontainers:junit-jupiter:1.14.0")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("io.kotest:kotest-assertions-arrow-jvm:4.0.3")
 
 }
 

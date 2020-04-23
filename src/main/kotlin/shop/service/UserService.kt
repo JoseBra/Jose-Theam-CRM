@@ -1,8 +1,10 @@
 package shop.service
 
+import arrow.core.Either
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import shop.controller.UserAlreadyExists
 import shop.model.Role
 import shop.model.User
 import shop.model.UserID
@@ -18,14 +20,18 @@ class UserService(
         @Autowired
         val passwordEncoder: PasswordEncoder
 ) {
-    fun createUser(username: String, password: String, roles: List<Role>): User {
-        val userToCreate = User(
-                UserID(idGenerator.generate()),
-                username,
-                passwordEncoder.encode(password),
-                roles
-        )
+    fun createUser(username: String, password: String, roles: List<Role>): Either<UserAlreadyExists, User> {
+        return if (userRepository.findByUsername(username) != null) {
+            Either.left(UserAlreadyExists("Username already in use."))
+        } else {
+            val userToCreate = User(
+                    UserID(idGenerator.generate()),
+                    username,
+                    passwordEncoder.encode(password),
+                    roles
+            )
 
-        return userRepository.save(userToCreate)
+            Either.right(userRepository.save(userToCreate))
+        }
     }
 }

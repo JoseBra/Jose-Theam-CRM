@@ -1,5 +1,6 @@
 package shop.controller
 
+import arrow.core.Either
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.json.JSONArray
@@ -34,7 +35,7 @@ class UserControllerTest {
     @Test
     @WithMockUser(roles = ["ADMIN"])
     fun `it should be able to create a user with correct parameters`() {
-        whenever(userService.createUser(any(), any(), any())).thenReturn(testUser)
+        whenever(userService.createUser(any(), any(), any())).thenReturn(Either.right(testUser))
 
         val request = MockMvcRequestBuilders
                 .post("/users")
@@ -65,6 +66,23 @@ class UserControllerTest {
                 .andExpect(status().isForbidden)
     }
 
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `it should return Conflict error code and message when usenrame already in use`() {
+        val expectedMessage = "Username alreay in use."
+        whenever(userService.createUser(any(), any(), any()))
+                .thenReturn(Either.left(UserAlreadyExists(expectedMessage))
+                )
+
+        val request = MockMvcRequestBuilders
+                .post("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validCreateUserRequestBody.toString())
+
+        mockMvc.perform(request)
+                .andExpect(status().isConflict)
+    }
 
     private final val testUser = User(UserID("testUser"), "testUsername", "testPassword", listOf(Role.ROLE_USER))
     val validCreateUserRequestBody: JSONObject = JSONObject()
@@ -73,5 +91,4 @@ class UserControllerTest {
             .put("roles", JSONArray().apply {
                 testUser.roles.forEach { role -> this.put(role) }
             })
-
 }

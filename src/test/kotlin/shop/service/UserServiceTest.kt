@@ -1,10 +1,11 @@
 package shop.service
 
+import io.kotest.assertions.arrow.either.shouldBeLeft
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.InjectMocks
@@ -54,6 +55,22 @@ class UserServiceTest {
         verify { passwordEncoder.encode(expectedUser.password) }
         verify { idGenerator.generate() }
 
-        Assertions.assertEquals(expectedUser, createdCustomer)
+        assertEquals(expectedUser, createdCustomer)
+    }
+
+    @Test
+    fun `it should not create a new user if username is already in use`() {
+        val expectedUser = User(
+                UserID("anyId"),
+                "username",
+                "password",
+                listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
+        )
+
+        every { userRepository.findByUsername("username") } returns expectedUser
+
+
+        service.createUser(expectedUser.username, expectedUser.password, expectedUser.roles)
+                .shouldBeLeft()
     }
 }
