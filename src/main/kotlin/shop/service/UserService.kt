@@ -4,12 +4,12 @@ import arrow.core.Either
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import shop.controller.UserAlreadyExists
 import shop.model.Role
 import shop.model.User
 import shop.model.UserID
 import shop.repository.UserRepository
 import shop.utils.IdGenerator
+import shop.utils.UserAlreadyExists
 
 @Service
 class UserService(

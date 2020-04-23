@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import shop.model.Role
 import shop.model.User
@@ -57,8 +56,5 @@ data class UserResponse(
                 UserResponse(user.username, user.userId.id, user.roles)
     }
 }
-
-@ResponseStatus(HttpStatus.CONFLICT, reason = "Username already in use.")
-class UserAlreadyExists(message: String) : Exception(message)
 
 

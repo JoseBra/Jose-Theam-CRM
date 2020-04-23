@@ -21,6 +21,7 @@ import shop.model.Role
 import shop.model.User
 import shop.model.UserID
 import shop.service.UserService
+import shop.utils.UserAlreadyExists
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest

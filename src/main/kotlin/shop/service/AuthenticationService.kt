@@ -6,8 +6,8 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.stereotype.Service
 import shop.config.security.JwtTokenProvider
-import shop.controller.FailedLoginException
 import shop.repository.UserRepository
+import shop.utils.FailedLoginException
 
 @Service
 class AuthenticationService {
