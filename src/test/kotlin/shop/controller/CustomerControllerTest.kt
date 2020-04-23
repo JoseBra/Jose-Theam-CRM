@@ -14,7 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import shop.model.Customer
 import shop.model.CustomerID
 import shop.service.CustomerService
@@ -30,7 +30,7 @@ class CustomerControllerTest {
     lateinit var mockMvc: MockMvc
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = ["USER"])
     fun `it should be able to create a customer with correct parameters`() {
         val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
 
@@ -47,16 +47,16 @@ class CustomerControllerTest {
                 .content(validCreateCustomerRequestBody.toString())
 
         mockMvc.perform(request)
-                .andExpect(MockMvcResultMatchers.status().isCreated)
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(testCustomer.name))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.surname").value(testCustomer.surname))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.customerId").value(testCustomer.customerId.id))
+                .andExpect(status().isCreated)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value(testCustomer.name))
+                .andExpect(jsonPath("$.surname").value(testCustomer.surname))
+                .andExpect(jsonPath("$.customerId").value(testCustomer.customerId.id))
     }
 
     @Test
-    @WithMockUser
-    fun `it should answer with 400 when post body params are incorrect`() {
+    @WithMockUser(roles = ["USER"])
+    fun `it should answer with 400 when post body params are incorrect creating a customer`() {
         val invalidCreateCustomerRequest = JSONObject()
                 .put("name", "anyName")
                 .put("tomato", "wrongThing")
@@ -68,7 +68,7 @@ class CustomerControllerTest {
                 .content(invalidCreateCustomerRequest.toString())
 
         mockMvc.perform(request)
-                .andExpect(MockMvcResultMatchers.status().isBadRequest)
+                .andExpect(status().isBadRequest)
     }
 
     @Test
@@ -88,6 +88,41 @@ class CustomerControllerTest {
                 .content(validCreateCustomerRequestBody.toString())
 
         mockMvc.perform(request)
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized)
+                .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should list all customers`() {
+        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
+
+        whenever(customerService.listAllCustomers()).thenReturn(listOf(testCustomer))
+
+        val request = MockMvcRequestBuilders
+                .get("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.items").isArray)
+                .andExpect(jsonPath("$.items[0].customerId").value(testCustomer.customerId.id))
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should return empty array object when there are no customers`() {
+        whenever(customerService.listAllCustomers()).thenReturn(emptyList())
+
+        val request = MockMvcRequestBuilders
+                .get("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.items").isArray)
+                .andExpect(jsonPath("$.items").isEmpty)
+
     }
 }

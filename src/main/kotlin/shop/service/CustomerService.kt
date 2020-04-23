@@ -18,4 +18,8 @@ class CustomerService(
     fun createCustomer(name: String, surname: String): Customer {
         return customerRepository.save(Customer(CustomerID(idGenerator.generate()), name, surname))
     }
+
+    fun listAllCustomers(): List<Customer> {
+        return customerRepository.findAll().toList()
+    }
 }

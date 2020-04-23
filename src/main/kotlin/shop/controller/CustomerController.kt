@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -29,6 +30,18 @@ class CustomerController {
                 .body(CustomerResponse.fromCustomer(customerService.createCustomer(request.name, request.surname)))
     }
 
+    @GetMapping(
+            "/customers",
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('USER')")
+    fun listCustomers(): ResponseEntity<ListCustomerResponse> {
+        val allCustomerResponse = customerService.listAllCustomers().map { CustomerResponse.fromCustomer(it) }
+
+        return ResponseEntity
+                .ok()
+                .body(ListCustomerResponse(allCustomerResponse))
+    }
+
 }
 
 data class CreateCustomerRequest(
@@ -46,3 +59,7 @@ data class CustomerResponse(
                 CustomerResponse(customer.name, customer.surname, customer.customerId.id)
     }
 }
+
+data class ListCustomerResponse(
+        val items: List<CustomerResponse>
+)

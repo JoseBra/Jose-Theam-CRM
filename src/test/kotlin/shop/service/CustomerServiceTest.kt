@@ -35,8 +35,6 @@ class CustomerServiceTest {
 
     @Test
     fun `it should create a new customer`() {
-        val expectedCustomer = Customer(CustomerID("testId"), "name", "surname")
-
         every { customerRepository.save(expectedCustomer) } returns expectedCustomer
 
         every { idGenerator.generate() } returns "testId"
@@ -47,4 +45,13 @@ class CustomerServiceTest {
 
         assertEquals(expectedCustomer, createdCustomer)
     }
+
+    @Test
+    fun `it should list all customers`() {
+        every { customerRepository.findAll() } returns listOf(expectedCustomer, expectedCustomer)
+
+        assertEquals(listOf(expectedCustomer, expectedCustomer), service.listAllCustomers())
+    }
+
+    private val expectedCustomer = Customer(CustomerID("testId"), "name", "surname")
 }
