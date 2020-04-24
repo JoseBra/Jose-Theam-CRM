@@ -9,7 +9,9 @@ data class Customer(
         @EmbeddedId
         val customerId: CustomerID,
         val name: String,
-        val surname: String
+        val surname: String,
+        @ManyToOne(fetch = FetchType.LAZY)
+        val createdBy: User
 )
 
 @Embeddable

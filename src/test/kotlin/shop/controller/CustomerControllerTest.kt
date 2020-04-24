@@ -16,8 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
-import shop.model.Customer
-import shop.model.CustomerID
+import shop.model.*
 import shop.service.CustomerService
 import shop.utils.CustomerNotFoundException
 
@@ -32,11 +31,17 @@ class CustomerControllerTest {
     lateinit var mockMvc: MockMvc
 
     @Test
-    @WithMockUser(roles = ["USER"])
-    fun `it should be able to create a customer with correct parameters`() {
-        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
+    @WithMockUser(roles = ["USER"], username = "testUser")
+    fun `it should be able to create a customer with correct parameters and hold a reference to the user that created it`() {
+        val creatingUser = User(UserID("anyUserId"), "testUser", "user", listOf(Role.ROLE_USER))
+        val testCustomer = Customer(
+                CustomerID("anyId"),
+                "testCustomer",
+                "anySurname",
+                creatingUser
+        )
 
-        whenever(customerService.createCustomer(any(), any())).thenReturn(testCustomer)
+        whenever(customerService.createCustomer(any(), any(), any())).thenReturn(Either.right(testCustomer))
 
         val validCreateCustomerRequestBody = JSONObject()
                 .put("name", testCustomer.name)
@@ -54,6 +59,8 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.name").value(testCustomer.name))
                 .andExpect(jsonPath("$.surname").value(testCustomer.surname))
                 .andExpect(jsonPath("$.customerId").value(testCustomer.customerId.id))
+                .andExpect(jsonPath("$.createdBy.username").value(testCustomer.createdBy.username))
+                .andExpect(jsonPath("$.createdBy.userId").value(testCustomer.createdBy.userId.id))
     }
 
     @Test
@@ -75,13 +82,9 @@ class CustomerControllerTest {
 
     @Test
     fun `it should return a 401 error if user has not been authenticated`() {
-        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
-
-        whenever(customerService.createCustomer(any(), any())).thenReturn(testCustomer)
-
         val validCreateCustomerRequestBody = JSONObject()
-                .put("name", testCustomer.name)
-                .put("surname", testCustomer.surname)
+                .put("name", "anyName")
+                .put("surname", "anySurname")
 
         val request = MockMvcRequestBuilders
                 .post("/customers")
@@ -96,7 +99,7 @@ class CustomerControllerTest {
     @Test
     @WithMockUser(roles = ["USER"])
     fun `it should list all customers`() {
-        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
+        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname", User(UserID(""), "", "", emptyList()))
 
         whenever(customerService.listAllCustomers()).thenReturn(listOf(testCustomer))
 
@@ -130,7 +133,13 @@ class CustomerControllerTest {
     @Test
     @WithMockUser(roles = ["USER"])
     fun `it should retrieve details for a customer given its id`() {
-        val expectedCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname")
+        val expectedCustomer = Customer(
+                CustomerID("anyId"),
+                "testCustomer",
+                "anySurname",
+                User(UserID("anyID"), "anySurname", "", emptyList())
+        )
+
         whenever(
                 customerService.retrieveDetails(expectedCustomer.customerId)
         )
@@ -144,6 +153,7 @@ class CustomerControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.customerId").value(expectedCustomer.customerId.id))
+                .andExpect(jsonPath("$.createdBy.userId").value(expectedCustomer.createdBy.userId.id))
     }
 
     @Test

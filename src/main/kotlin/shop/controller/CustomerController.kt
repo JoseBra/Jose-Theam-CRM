@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 import shop.model.Customer
 import shop.model.CustomerID
 import shop.service.CustomerService
+import java.security.Principal
 
 @RestController
 class CustomerController {
@@ -22,11 +23,20 @@ class CustomerController {
             produces = ["application/json"])
     @PreAuthorize("hasRole('USER')")
     fun createCustomer(
-            @RequestBody request: CreateCustomerRequest
+            @RequestBody request: CreateCustomerRequest,
+            requestingUserPrincipal: Principal
     ): ResponseEntity<CustomerResponse> {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(CustomerResponse.fromCustomer(customerService.createCustomer(request.name, request.surname)))
+        val createCustomerAttempt = customerService.createCustomer(request.name, request.surname, requestingUserPrincipal.name)
+
+        when (createCustomerAttempt) {
+            is Either.Right ->
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(CustomerResponse.fromCustomer(createCustomerAttempt.b))
+
+            is Either.Left ->
+                throw createCustomerAttempt.a
+        }
     }
 
     @GetMapping(
@@ -68,11 +78,17 @@ data class CreateCustomerRequest(
 data class CustomerResponse(
         val name: String,
         val surname: String,
-        val customerId: String
+        val customerId: String,
+        val createdBy: UserResponse
 ) {
     companion object {
         fun fromCustomer(customer: Customer) =
-                CustomerResponse(customer.name, customer.surname, customer.customerId.id)
+                CustomerResponse(
+                        customer.name,
+                        customer.surname,
+                        customer.customerId.id,
+                        UserResponse.fromUser(customer.createdBy)
+                )
     }
 }
 

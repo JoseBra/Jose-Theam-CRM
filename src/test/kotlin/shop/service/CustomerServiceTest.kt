@@ -12,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
-import shop.model.Customer
-import shop.model.CustomerID
+import shop.model.*
 import shop.repository.CustomerRepository
+import shop.repository.UserRepository
 import shop.utils.IdGenerator
 import java.util.*
 
@@ -25,6 +25,9 @@ class CustomerServiceTest {
     lateinit var customerRepository: CustomerRepository
 
     @MockK
+    lateinit var userRepository: UserRepository
+
+    @MockK
     lateinit var idGenerator: IdGenerator
 
     @InjectMocks
@@ -33,20 +36,35 @@ class CustomerServiceTest {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
-        service = CustomerService(customerRepository, idGenerator)
+        service = CustomerService(customerRepository, userRepository, idGenerator)
     }
 
     @Test
     fun `it should create a new customer`() {
         every { customerRepository.save(expectedCustomer) } returns expectedCustomer
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
 
         every { idGenerator.generate() } returns "testId"
 
-        val createdCustomer = service.createCustomer("name", "surname")
+        val createdCustomer = service.createCustomer(expectedCustomer.name, expectedCustomer.surname, creatingUser.username)
 
         verify { customerRepository.save(expectedCustomer) }
+        verify { userRepository.findByUsername(creatingUser.username) }
 
-        assertEquals(expectedCustomer, createdCustomer)
+        assertEquals(expectedCustomer, (createdCustomer as Either.Right).b)
+    }
+
+    @Test
+    fun `it should trigger an error when trying to create a customer with a user that does not exist`() {
+        every { userRepository.findByUsername(creatingUser.username) } returns null
+
+        every { idGenerator.generate() } returns "testId"
+
+        val createCustomerAttempt = service.createCustomer(expectedCustomer.name, expectedCustomer.surname, creatingUser.username)
+
+        verify { userRepository.findByUsername(creatingUser.username) }
+
+        createCustomerAttempt.shouldBeLeft()
     }
 
     @Test
@@ -72,5 +90,13 @@ class CustomerServiceTest {
         findCustomerAttempt.shouldBeLeft()
     }
 
-    private val expectedCustomer = Customer(CustomerID("testId"), "name", "surname")
+    val creatingUser = User(UserID("anyId"),
+            "anyCreatingUsername",
+            "", listOf(Role.ROLE_USER))
+    private val expectedCustomer = Customer(
+            CustomerID("testId"),
+            "name",
+            "surname",
+            creatingUser
+    )
 }

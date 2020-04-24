@@ -15,3 +15,6 @@ class CustomerNotFoundException(message: String) : Exception(message)
 
 @ResponseStatus(HttpStatus.CONFLICT, reason = "Username already in use.")
 class UserAlreadyExists(message: String) : Exception(message)
+
+@ResponseStatus(HttpStatus.UNAUTHORIZED, reason = "Requesting user does not exist in the system.")
+class UserNotFound(message: String) : Exception(message)
