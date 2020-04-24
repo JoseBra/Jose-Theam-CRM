@@ -1,1 +1,1 @@
-ALTER TABLE Users ADD COLUMN created_by VARCHAR REFERENCES Users(id);
+ALTER TABLE Customer ADD COLUMN created_by_id VARCHAR REFERENCES Users(id);
