@@ -6,64 +6,165 @@
   },
   "item": [
     {
-      "name": "Create customer",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json",
-            "type": "text"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n\"name\": \"Alex\",\n\"surname\": \"Sanchez\"\n}"
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Create customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"name\": \"Alex\",\n\"surname\": \"Sanchez\"\n}"
+            },
+            "url": {
+              "raw": "localhost:8080/customers",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "customers"
+              ]
+            }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "localhost:8080/customers",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "customers"
-          ]
+        {
+          "name": "List all customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/customers/",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "customers",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get details of a customer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/customers/43af4542-2074-4fe5-ad3f-ab62198501c9",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "customers",
+                "43af4542-2074-4fe5-ad3f-ab62198501c9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "localhost:8080/customers/53f925ce-58fb-4ca8-8b49-cc61a1b4788e",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "customers",
+                "53f925ce-58fb-4ca8-8b49-cc61a1b4788e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update a customer",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"name\": \"Sara\",\n\"surname\": \"Urzian\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "localhost:8080/customers/53f925ce-58fb-4ca8-8b49-cc61a1b4788e",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "customers",
+                "53f925ce-58fb-4ca8-8b49-cc61a1b4788e"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ],
+      "description": "Requests related to Customers.",
+      "protocolProfileBehavior": {}
     },
     {
-      "name": "Create User",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "type": "text",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n\t\"username\": \"testUser\",\n\t\"password\": \"tomato\",\n\t\"roles\": [\n\t\t\"ROLE_USER\"\n\t\t]\n}"
-        },
-        "url": {
-          "raw": "localhost:8080/users",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "users"
-          ]
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "type": "text",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"username\": \"testUser\",\n\t\"password\": \"tomato\",\n\t\"roles\": [\n\t\t\"ROLE_USER\"\n\t\t]\n}"
+            },
+            "url": {
+              "raw": "localhost:8080/users",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ],
+      "protocolProfileBehavior": {}
     },
     {
       "name": "Login",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [
           {
@@ -102,7 +203,7 @@
     "bearer": [
       {
         "key": "token",
-        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOlt7ImF1dGhvcml0eSI6IlJPTEVfVVNFUiJ9LHsiYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaWF0IjoxNTg3NTk2OTExLCJleHAiOjE1ODc2MDA1MTF9.L-APfyBhZuErTILQuEwiIQZu9kVpFRkbol4ekX42JPo",
+        "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOlt7ImF1dGhvcml0eSI6IlJPTEVfVVNFUiJ9LHsiYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaWF0IjoxNTg3NzU1MzQ2LCJleHAiOjE1ODc3NTg5NDZ9.wtcgMZPwlsVpMsU_DXQA2nxIfziyhF_XUZV1DLiL7Ic",
         "type": "string"
       }
     ]
