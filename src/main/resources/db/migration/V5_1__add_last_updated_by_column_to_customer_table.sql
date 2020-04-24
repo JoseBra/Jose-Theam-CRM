@@ -1,0 +1,1 @@
+ALTER TABLE Customer ADD COLUMN last_updated_by_id VARCHAR REFERENCES Users(id);

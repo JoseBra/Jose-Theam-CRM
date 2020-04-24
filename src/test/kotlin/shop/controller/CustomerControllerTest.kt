@@ -61,6 +61,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.customerId").value(testCustomer.customerId.id))
                 .andExpect(jsonPath("$.createdBy.username").value(testCustomer.createdBy.username))
                 .andExpect(jsonPath("$.createdBy.userId").value(testCustomer.createdBy.userId.id))
+                .andExpect(jsonPath("$.lastUpdatedBy").isEmpty)
     }
 
     @Test
@@ -171,5 +172,63 @@ class CustomerControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isNotFound)
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"], username = "testUser")
+    fun `it should update a Customer on a put request and hold a reference to the updating user`() {
+        val updatingUser = User(UserID("anyUserId"), "testUser", "password", listOf(Role.ROLE_USER))
+
+        val expectedCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname",
+                updatingUser, updatingUser)
+
+        whenever(customerService.updateCustomer(
+                expectedCustomer.customerId, expectedCustomer.name,
+                expectedCustomer.surname, updatingUser.username)
+        )
+                .thenReturn(Either.right(expectedCustomer))
+
+        val validUpdateRequestBody = JSONObject()
+                .put("name", expectedCustomer.name)
+                .put("surname", expectedCustomer.surname)
+
+        val request = MockMvcRequestBuilders
+                .put("/customers/${expectedCustomer.customerId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validUpdateRequestBody.toString())
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value(expectedCustomer.name))
+                .andExpect(jsonPath("$.surname").value(expectedCustomer.surname))
+                .andExpect(jsonPath("$.customerId").value(expectedCustomer.customerId.id))
+                .andExpect(jsonPath("$.createdBy.username").value(expectedCustomer.createdBy.username))
+                .andExpect(jsonPath("$.createdBy.userId").value(expectedCustomer.createdBy.userId.id))
+                .andExpect(jsonPath("$.lastUpdatedBy.userId").value(expectedCustomer.lastUpdatedBy!!.userId.id))
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should return 404 when updating a Customer that does not exist`() {
+        whenever(
+                customerService.updateCustomer(any(), any(), any(), any())
+        )
+                .thenReturn(Either.left(CustomerNotFoundException("")))
+
+        val validUpdateRequestBody = JSONObject()
+                .put("name", "name")
+                .put("surname", "surname")
+
+        val request = MockMvcRequestBuilders
+                .put("/customers/1234")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validUpdateRequestBody.toString())
+
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound)
+
     }
 }

@@ -39,6 +39,35 @@ class CustomerController {
         }
     }
 
+    @PutMapping(
+            "/customers/{id}",
+            consumes = ["application/json"],
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('USER')")
+    fun updateCustomer(
+            @PathVariable id: String,
+            @RequestBody request: CreateCustomerRequest,
+            requestingUserPrincipal: Principal
+    ): ResponseEntity<CustomerResponse> {
+
+        val updateCustomerAttempt = customerService.updateCustomer(
+                CustomerID(id),
+                request.name,
+                request.surname,
+                requestingUserPrincipal.name
+        )
+
+        when (updateCustomerAttempt) {
+            is Either.Right ->
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(CustomerResponse.fromCustomer(updateCustomerAttempt.b))
+
+            is Either.Left ->
+                throw updateCustomerAttempt.a
+        }
+    }
+
     @GetMapping(
             "/customers",
             produces = ["application/json"])
@@ -79,7 +108,8 @@ data class CustomerResponse(
         val name: String,
         val surname: String,
         val customerId: String,
-        val createdBy: UserResponse
+        val createdBy: UserResponse,
+        val lastUpdatedBy: UserResponse?
 ) {
     companion object {
         fun fromCustomer(customer: Customer) =
@@ -87,7 +117,8 @@ data class CustomerResponse(
                         customer.name,
                         customer.surname,
                         customer.customerId.id,
-                        UserResponse.fromUser(customer.createdBy)
+                        UserResponse.fromUser(customer.createdBy),
+                        customer.lastUpdatedBy?.let { UserResponse.fromUser(it) }
                 )
     }
 }

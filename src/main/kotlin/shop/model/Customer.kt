@@ -11,7 +11,9 @@ data class Customer(
         val name: String,
         val surname: String,
         @ManyToOne(fetch = FetchType.LAZY)
-        val createdBy: User
+        val createdBy: User,
+        @ManyToOne(fetch = FetchType.LAZY, optional = true)
+        val lastUpdatedBy: User? = null
 )
 
 @Embeddable

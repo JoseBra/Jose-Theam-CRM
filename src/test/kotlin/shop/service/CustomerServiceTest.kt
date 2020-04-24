@@ -15,7 +15,9 @@ import org.mockito.InjectMocks
 import shop.model.*
 import shop.repository.CustomerRepository
 import shop.repository.UserRepository
+import shop.utils.CustomerNotFoundException
 import shop.utils.IdGenerator
+import shop.utils.UserNotFoundException
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -88,6 +90,67 @@ class CustomerServiceTest {
         val findCustomerAttempt = service.retrieveDetails(expectedCustomer.customerId)
 
         findCustomerAttempt.shouldBeLeft()
+    }
+
+    @Test
+    fun `it should update an existing customer`() {
+        val expectedUpdatedCustomer = expectedCustomer.copy(
+                name = "updatedName",
+                surname = "updatedSurname",
+                lastUpdatedBy = creatingUser
+        )
+
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.of(expectedCustomer)
+        every { customerRepository.save(expectedUpdatedCustomer) } returns expectedUpdatedCustomer
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
+
+        val updatedCustomer = service.updateCustomer(
+                expectedCustomer.customerId,
+                expectedUpdatedCustomer.name,
+                expectedUpdatedCustomer.surname,
+                creatingUser.username)
+
+        verify { customerRepository.save(expectedUpdatedCustomer) }
+        verify { customerRepository.findById(expectedCustomer.customerId) }
+        verify { userRepository.findByUsername(creatingUser.username) }
+
+        assertEquals(expectedUpdatedCustomer, (updatedCustomer as Either.Right).b)
+    }
+
+    @Test
+    fun `it should return an error when updating a Customer that does not exist`() {
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.empty()
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
+
+        val updateCustomerAttempt = service.updateCustomer(
+                expectedCustomer.customerId,
+                "anything",
+                "anything",
+                creatingUser.username)
+
+        verify { customerRepository.findById(expectedCustomer.customerId) }
+        verify { userRepository.findByUsername(creatingUser.username) }
+
+        updateCustomerAttempt.shouldBeLeft()
+        assert((updateCustomerAttempt as Either.Left).a is CustomerNotFoundException)
+    }
+
+    @Test
+    fun `it should return an error when updating with a User that does not exist`() {
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.empty()
+        every { userRepository.findByUsername(creatingUser.username) } returns null
+
+        val updateCustomerAttempt = service.updateCustomer(
+                expectedCustomer.customerId,
+                "anything",
+                "anything",
+                creatingUser.username)
+
+        verify { userRepository.findByUsername(creatingUser.username) }
+
+        updateCustomerAttempt.shouldBeLeft()
+        assert((updateCustomerAttempt as Either.Left).a is UserNotFoundException)
+
     }
 
     val creatingUser = User(UserID("anyId"),
