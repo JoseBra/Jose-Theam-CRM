@@ -231,4 +231,36 @@ class CustomerControllerTest {
                 .andExpect(status().isNotFound)
 
     }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should delete a customer when it exists`() {
+        val testCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname",
+                User(UserID(""), "", "", emptyList()))
+
+        whenever(customerService.deleteCustomer(testCustomer.customerId)).thenReturn(Either.right(testCustomer))
+
+        val request = MockMvcRequestBuilders
+                .delete("/customers/${testCustomer.customerId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isNoContent)
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should return 404 when deleting a customer that does not exist`() {
+        whenever(customerService.deleteCustomer(any())).thenReturn(Either.left(CustomerNotFoundException("")))
+
+        val request = MockMvcRequestBuilders
+                .delete("/customers/1234")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound)
+    }
+
 }

@@ -97,6 +97,23 @@ class CustomerController {
         }
     }
 
+    @DeleteMapping(
+            "/customers/{id}",
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('USER')")
+    fun deleteCustomer(
+            @PathVariable id: String
+    ): ResponseEntity<Any> {
+        val deleteCustomerAttempt = customerService.deleteCustomer(CustomerID(id))
+
+        when (deleteCustomerAttempt) {
+            is Either.Right ->
+                return ResponseEntity.noContent().build()
+            is Either.Left ->
+                throw deleteCustomerAttempt.a
+        }
+    }
+
 }
 
 data class CreateCustomerRequest(

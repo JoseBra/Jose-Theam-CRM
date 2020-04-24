@@ -153,6 +153,30 @@ class CustomerServiceTest {
 
     }
 
+    @Test
+    fun `it should delete a Customer when it exists`() {
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.of(expectedCustomer)
+        every { customerRepository.delete(expectedCustomer) } returns Unit
+
+        val updatedCustomer = service.deleteCustomer(expectedCustomer.customerId)
+
+        verify { customerRepository.delete(expectedCustomer) }
+        verify { customerRepository.findById(expectedCustomer.customerId) }
+
+        assertEquals(expectedCustomer, (updatedCustomer as Either.Right).b)
+    }
+
+    @Test
+    fun `it should return an error when deleting a Customer that does not exist`() {
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.empty()
+
+        val deleteCustomerAttempt = service.deleteCustomer(expectedCustomer.customerId)
+
+        verify { customerRepository.findById(expectedCustomer.customerId) }
+
+        deleteCustomerAttempt.shouldBeLeft()
+    }
+
     val creatingUser = User(UserID("anyId"),
             "anyCreatingUsername",
             "", listOf(Role.ROLE_USER))

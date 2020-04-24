@@ -66,4 +66,15 @@ class CustomerService(
             Either.left(CustomerNotFoundException("Customer with id ${customerId.id} not found."))
         }
     }
+
+    fun deleteCustomer(customerId: CustomerID): Either<CustomerNotFoundException, Customer> {
+        val foundCustomer = customerRepository.findById(customerId)
+
+        return if (foundCustomer.isPresent) {
+            customerRepository.delete(foundCustomer.get())
+            Either.right(foundCustomer.get())
+        } else {
+            Either.left(CustomerNotFoundException("Customer with id ${customerId.id} not found."))
+        }
+    }
 }
