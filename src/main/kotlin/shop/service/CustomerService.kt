@@ -23,16 +23,13 @@ class CustomerService(
 
     fun createCustomer(name: String, surname: String, creatingUsername: String): Either<UserNotFoundException, Customer> {
         val creatingUser = userRepository.findByUsername(creatingUsername)
+                ?: return Either.left(UserNotFoundException("Trying to create a customer with a user that does not exist."))
 
-        return if (creatingUser != null) {
-            Either.right(customerRepository.save(Customer(
-                    CustomerID(idGenerator.generate()),
-                    name,
-                    surname,
-                    creatingUser)))
-        } else {
-            Either.left(UserNotFoundException("Trying to create a customer with a user that does not exist."))
-        }
+        return Either.right(customerRepository.save(Customer(
+                CustomerID(idGenerator.generate()),
+                name,
+                surname,
+                creatingUser)))
     }
 
     fun listAllCustomers(): List<Customer> {
