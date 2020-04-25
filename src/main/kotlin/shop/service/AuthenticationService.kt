@@ -6,6 +6,7 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.stereotype.Service
 import shop.config.security.JwtTokenProvider
+import shop.model.Role
 import shop.repository.UserRepository
 import shop.utils.FailedLoginException
 
@@ -22,10 +23,10 @@ class AuthenticationService {
 
     fun login(username: String, password: String): String {
         try {
-            authenticationManager.authenticate(
+            val authentication = authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken(username, password)
             )
-            return jwtTokenProvider.createToken(username, userRepository.findByUsername(username)!!.roles)
+            return jwtTokenProvider.createToken(username, authentication.authorities.map { Role.valueOf(it.authority) })
         } catch (e: BadCredentialsException) {
             throw FailedLoginException("Invalid username/password provided.")
         }

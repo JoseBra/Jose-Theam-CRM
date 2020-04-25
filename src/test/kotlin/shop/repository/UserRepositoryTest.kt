@@ -1,5 +1,6 @@
 package shop.shop.repository
 
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,6 +29,19 @@ class UserRepositoryTest {
 
         assert(foundActiveUsers.contains(activeUser))
         assert(!foundActiveUsers.contains(inactiveUser))
+    }
+
+    @Test
+    fun `it should find by username only when user is active`() {
+        Assertions.assertEquals(
+                repository.findByUsernameAndIsActiveTrue(activeUser.username)?.userId,
+                activeUser.userId
+        )
+
+        Assertions.assertEquals(
+                repository.findByUsernameAndIsActiveTrue(inactiveUser.username),
+                null
+        )
     }
 
     private val activeUser = User(UserID("activeUserId"), "activeUser", "password", listOf(Role.ROLE_USER))

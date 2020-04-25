@@ -48,7 +48,7 @@ class AuthenticationControllerTest {
                 passwordEncoder.encode("testPassword"),
                 listOf(Role.ROLE_USER))
 
-        whenever(userRepository.findByUsername(testUser.username))
+        whenever(userRepository.findByUsernameAndIsActiveTrue(testUser.username))
                 .thenReturn(testUser)
 
         val validLoginRequest: JSONObject = JSONObject()

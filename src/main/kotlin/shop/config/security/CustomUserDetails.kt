@@ -14,7 +14,7 @@ class CustomUserDetails : UserDetailsService {
     lateinit var userRepository: UserRepository
 
     override fun loadUserByUsername(username: String): UserDetails {
-        val user = userRepository.findByUsername(username)
+        val user = userRepository.findByUsernameAndIsActiveTrue(username)
         return User
                 .withUsername(username)
                 .password(user!!.password)
