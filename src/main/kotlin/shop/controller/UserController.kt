@@ -68,13 +68,47 @@ class UserController {
         }
     }
 
+    @PutMapping(
+            "/users/{id}",
+            consumes = ["application/json"],
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('ADMIN')")
+    fun updateUser(
+            @PathVariable id: String,
+            @RequestBody request: UpdateUserRequest
+    ): ResponseEntity<UserResponse> {
 
+        val updateUserAttempt = userService.updateUser(
+                UserID(id),
+                request.username,
+                request.password,
+                request.roles,
+                request.isActive
+        )
+
+        when (updateUserAttempt) {
+            is Either.Right ->
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(UserResponse.fromUser(updateUserAttempt.b))
+
+            is Either.Left ->
+                throw updateUserAttempt.a
+        }
+    }
 }
 
 data class CreateUserRequest(
         val username: String,
         val password: String,
         val roles: ArrayList<Role>
+)
+
+data class UpdateUserRequest(
+        val username: String,
+        val password: String,
+        val roles: ArrayList<Role>,
+        val isActive: Boolean = true
 )
 
 data class UserResponse(

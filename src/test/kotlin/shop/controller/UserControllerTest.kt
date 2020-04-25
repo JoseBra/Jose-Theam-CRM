@@ -117,6 +117,47 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.isActive").value(false))
     }
 
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `it should allow users updates such as changing roles`() {
+        val expectedUpdatedUser = testUser.copy(
+                username = "newUsername",
+                roles = listOf(Role.ROLE_USER, Role.ROLE_ADMIN)
+        )
+
+        whenever(userService.updateUser(
+                expectedUpdatedUser.userId,
+                expectedUpdatedUser.username,
+                expectedUpdatedUser.password,
+                expectedUpdatedUser.roles,
+                expectedUpdatedUser.isActive)
+        )
+                .thenReturn(Either.right(expectedUpdatedUser))
+
+        val validUpdateUserRequestBody: JSONObject = JSONObject()
+                .put("username", expectedUpdatedUser.username)
+                .put("password", expectedUpdatedUser.password)
+                .put("roles", JSONArray().apply {
+                    expectedUpdatedUser.roles.forEach { role -> this.put(role) }
+                })
+
+        val request = MockMvcRequestBuilders
+                .put("/users/${expectedUpdatedUser.userId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validUpdateUserRequestBody.toString())
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.userId").value(expectedUpdatedUser.userId.id))
+                .andExpect(jsonPath("$.username").value(expectedUpdatedUser.username))
+                .andExpect(jsonPath("$.roles").isNotEmpty)
+                .andExpect(jsonPath("$.roles[0]").value(expectedUpdatedUser.roles.first().toString()))
+                .andExpect(jsonPath("$.roles[1]").value(expectedUpdatedUser.roles[1].toString()))
+
+    }
+
     private final val testUser = User(UserID("testUser"), "testUsername", "testPassword", listOf(Role.ROLE_USER))
     val validCreateUserRequestBody: JSONObject = JSONObject()
             .put("username", testUser.username)

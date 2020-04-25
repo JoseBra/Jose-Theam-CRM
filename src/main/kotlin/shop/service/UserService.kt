@@ -40,14 +40,33 @@ class UserService(
         return userRepository.findByIsActiveTrue().toList()
     }
 
-    fun markAsInactive(userID: UserID): Either<UserNotFoundException, User> {
-        val foundUser = userRepository.findById(userID)
+    fun markAsInactive(userId: UserID): Either<UserNotFoundException, User> {
+        val foundUser = userRepository.findById(userId)
 
         return if (foundUser.isPresent) {
             val inactiveUser = userRepository.save(foundUser.get().copy(isActive = false))
             Either.right(inactiveUser)
         } else {
-            Either.left(UserNotFoundException("User with id ${userID.id} not found."))
+            Either.left(UserNotFoundException("User with id ${userId.id} not found."))
+        }
+    }
+
+    fun updateUser(
+            userId: UserID, newUsername: String,
+            newPassword: String, newRoles: List<Role>,
+            newIsActive: Boolean): Either<UserNotFoundException, User> {
+
+        val foundUser = userRepository.findById(userId)
+
+        return if (foundUser.isPresent) {
+            val updatedUser = userRepository.save(foundUser.get().copy(
+                    username = newUsername,
+                    password = newPassword,
+                    roles = newRoles,
+                    isActive = newIsActive))
+            Either.right(updatedUser)
+        } else {
+            Either.left(UserNotFoundException("User with id ${userId.id} not found."))
         }
     }
 }

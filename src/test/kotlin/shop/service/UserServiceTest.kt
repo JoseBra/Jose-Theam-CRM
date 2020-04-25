@@ -16,6 +16,7 @@ import shop.model.User
 import shop.model.UserID
 import shop.repository.UserRepository
 import shop.utils.IdGenerator
+import java.util.*
 
 class UserServiceTest {
     @MockK
@@ -68,6 +69,37 @@ class UserServiceTest {
         every { userRepository.findByIsActiveTrue() } returns mutableListOf(expectedUser, expectedUser)
 
         assertEquals(listOf(expectedUser, expectedUser), service.listAllActiveUsers())
+    }
+
+    @Test
+    fun `it should allow user updates when it exists`() {
+        every { userRepository.findById(expectedUser.userId) } returns Optional.of(expectedUser)
+
+        val expectedUpdatedUser = expectedUser.copy(
+                username = "newUsername",
+                roles = listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
+        )
+
+        every { userRepository.save(expectedUpdatedUser) } returns expectedUpdatedUser
+
+        val updatedUser = service
+                .updateUser(
+                        expectedUpdatedUser.userId,
+                        expectedUpdatedUser.username,
+                        expectedUpdatedUser.password,
+                        expectedUpdatedUser.roles,
+                        expectedUpdatedUser.isActive)
+
+        assertEquals(expectedUpdatedUser, (updatedUser as Either.Right).b)
+    }
+
+    @Test
+    fun `it should return an error when user does not exists`() {
+        every { userRepository.findById(expectedUser.userId) } returns Optional.empty()
+
+        service
+                .updateUser(expectedUser.userId, "", "", emptyList(), true)
+                .shouldBeLeft()
     }
 
     private val expectedUser = User(
