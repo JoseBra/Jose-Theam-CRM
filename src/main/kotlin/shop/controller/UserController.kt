@@ -5,12 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import shop.model.Role
 import shop.model.User
+import shop.model.UserID
 import shop.service.UserService
 
 @RestController
@@ -51,6 +49,25 @@ class UserController {
                 .body(ListUsersResponse(allUsersResponses))
     }
 
+    @DeleteMapping(
+            "/users/{id}",
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('ADMIN')")
+    fun deleteUser(
+            @PathVariable id: String
+    ): ResponseEntity<UserResponse> {
+        val inactiveUserAttempt = userService.markAsInactive(UserID(id))
+
+        when (inactiveUserAttempt) {
+            is Either.Right ->
+                return ResponseEntity
+                        .ok()
+                        .body(UserResponse.fromUser(inactiveUserAttempt.b))
+            is Either.Left ->
+                throw inactiveUserAttempt.a
+        }
+    }
+
 
 }
 
@@ -63,11 +80,12 @@ data class CreateUserRequest(
 data class UserResponse(
         val username: String,
         val userId: String,
-        val roles: List<Role>
+        val roles: List<Role>,
+        val isActive: Boolean
 ) {
     companion object {
         fun fromUser(user: User) =
-                UserResponse(user.username, user.userId.id, user.roles)
+                UserResponse(user.username, user.userId.id, user.roles, user.isActive)
     }
 }
 

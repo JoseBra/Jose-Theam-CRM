@@ -10,6 +10,7 @@ import shop.model.UserID
 import shop.repository.UserRepository
 import shop.utils.IdGenerator
 import shop.utils.UserAlreadyExists
+import shop.utils.UserNotFoundException
 
 @Service
 class UserService(
@@ -37,5 +38,16 @@ class UserService(
 
     fun listAllActiveUsers(): List<User> {
         return userRepository.findByIsActiveTrue().toList()
+    }
+
+    fun markAsInactive(userID: UserID): Either<UserNotFoundException, User> {
+        val foundUser = userRepository.findById(userID)
+
+        return if (foundUser.isPresent) {
+            val inactiveUser = userRepository.save(foundUser.get().copy(isActive = false))
+            Either.right(inactiveUser)
+        } else {
+            Either.left(UserNotFoundException("User with id ${userID.id} not found."))
+        }
     }
 }

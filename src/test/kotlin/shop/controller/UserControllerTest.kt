@@ -100,6 +100,23 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.items[0].userId").value(testUser.userId.id))
     }
 
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `it should mark as inactive a user when deleting it`() {
+        whenever(userService.markAsInactive(testUser.userId))
+                .thenReturn(Either.right(testUser.copy(isActive = false)))
+
+        val request = MockMvcRequestBuilders
+                .delete("/users/${testUser.userId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.userId").value(testUser.userId.id))
+                .andExpect(jsonPath("$.isActive").value(false))
+    }
+
     private final val testUser = User(UserID("testUser"), "testUsername", "testPassword", listOf(Role.ROLE_USER))
     val validCreateUserRequestBody: JSONObject = JSONObject()
             .put("username", testUser.username)
