@@ -34,4 +34,8 @@ class UserService(
             Either.right(userRepository.save(userToCreate))
         }
     }
+
+    fun listAllActiveUsers(): List<User> {
+        return userRepository.findByIsActiveTrue().toList()
+    }
 }

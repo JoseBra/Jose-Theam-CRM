@@ -38,13 +38,6 @@ class UserServiceTest {
 
     @Test
     fun `it should create a user with the given values encoding its password`() {
-        val expectedUser = User(
-                UserID("anyId"),
-                "username",
-                "password",
-                listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
-        )
-
         every { userRepository.findByUsername(expectedUser.username) } returns null
 
         every { userRepository.save(expectedUser) } returns expectedUser
@@ -63,16 +56,25 @@ class UserServiceTest {
 
     @Test
     fun `it should not create a new user if username is already in use`() {
-        val expectedUser = User(
-                UserID("anyId"),
-                "username",
-                "password",
-                listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
-        )
-
         every { userRepository.findByUsername(expectedUser.username) } returns expectedUser
 
-        service.createUser(expectedUser.username, expectedUser.password, expectedUser.roles)
+        service
+                .createUser(expectedUser.username, expectedUser.password, expectedUser.roles)
                 .shouldBeLeft()
     }
+
+    @Test
+    fun `it should list all active users`() {
+        every { userRepository.findByIsActiveTrue() } returns mutableListOf(expectedUser, expectedUser)
+
+        assertEquals(listOf(expectedUser, expectedUser), service.listAllActiveUsers())
+    }
+
+    private val expectedUser = User(
+            UserID("anyId"),
+            "username",
+            "password",
+            listOf(Role.ROLE_ADMIN, Role.ROLE_USER)
+    )
+
 }

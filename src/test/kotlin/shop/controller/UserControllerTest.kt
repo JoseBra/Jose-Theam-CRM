@@ -69,11 +69,10 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(roles = ["ADMIN"])
-    fun `it should return Conflict error code and message when usenrame already in use`() {
+    fun `it should return Conflict error code and message when username already in use`() {
         val expectedMessage = "Username alreay in use."
         whenever(userService.createUser(any(), any(), any()))
-                .thenReturn(Either.left(UserAlreadyExists(expectedMessage))
-                )
+                .thenReturn(Either.left(UserAlreadyExists(expectedMessage)))
 
         val request = MockMvcRequestBuilders
                 .post("/users")
@@ -83,6 +82,22 @@ class UserControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isConflict)
+    }
+
+    @Test
+    @WithMockUser(roles = ["ADMIN"])
+    fun `it should be able to list all active users`() {
+        whenever(userService.listAllActiveUsers()).thenReturn(listOf(testUser))
+
+        val request = MockMvcRequestBuilders
+                .get("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.items").isArray)
+                .andExpect(jsonPath("$.items[0].userId").value(testUser.userId.id))
     }
 
     private final val testUser = User(UserID("testUser"), "testUsername", "testPassword", listOf(Role.ROLE_USER))

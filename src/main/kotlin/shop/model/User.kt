@@ -14,7 +14,8 @@ data class User(
         @ElementCollection(fetch = FetchType.EAGER)
         @CollectionTable(name = "users_roles", joinColumns = [JoinColumn(name = "user_id")])
         @Enumerated(EnumType.STRING)
-        val roles: List<Role>
+        val roles: List<Role>,
+        val isActive: Boolean = true
 )
 
 @Embeddable

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -38,6 +39,19 @@ class UserController {
         }
     }
 
+    @GetMapping(
+            "/users",
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('ADMIN')")
+    fun listActiveUsers(): ResponseEntity<ListUsersResponse> {
+        val allUsersResponses = userService.listAllActiveUsers().map { UserResponse.fromUser(it) }
+
+        return ResponseEntity
+                .ok()
+                .body(ListUsersResponse(allUsersResponses))
+    }
+
+
 }
 
 data class CreateUserRequest(
@@ -56,5 +70,9 @@ data class UserResponse(
                 UserResponse(user.username, user.userId.id, user.roles)
     }
 }
+
+data class ListUsersResponse(
+        val items: List<UserResponse>
+)
 
 
