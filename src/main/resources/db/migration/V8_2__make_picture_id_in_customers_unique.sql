@@ -1,0 +1,1 @@
+ALTER TABLE Customer ADD UNIQUE (picture_id);
