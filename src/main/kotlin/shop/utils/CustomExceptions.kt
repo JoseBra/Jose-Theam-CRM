@@ -21,3 +21,6 @@ class UserNotFoundException(message: String) : Exception(message)
 
 @ResponseStatus(HttpStatus.BAD_REQUEST, reason = "Input encoded picture could not be validated as Base64 content.")
 class InvalidBase64Picture(message: String) : Exception(message)
+
+@ResponseStatus(HttpStatus.BAD_REQUEST, reason = "Specified picture ID does not exist.")
+class PictureNotFoundException(message: String) : Exception(message)

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import shop.model.*
 import shop.repository.CustomerRepository
+import shop.repository.PictureRepository
 import shop.repository.UserRepository
 import shop.utils.CustomerNotFoundException
 import shop.utils.IdGenerator
@@ -30,6 +31,9 @@ class CustomerServiceTest {
     lateinit var userRepository: UserRepository
 
     @MockK
+    lateinit var pictureRepository: PictureRepository
+
+    @MockK
     lateinit var idGenerator: IdGenerator
 
     @InjectMocks
@@ -38,7 +42,7 @@ class CustomerServiceTest {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
-        service = CustomerService(customerRepository, userRepository, idGenerator)
+        service = CustomerService(customerRepository, userRepository, pictureRepository, idGenerator)
     }
 
     @Test
@@ -65,6 +69,48 @@ class CustomerServiceTest {
         val createCustomerAttempt = service.createCustomer(expectedCustomer.name, expectedCustomer.surname, creatingUser.username)
 
         verify { userRepository.findByUsername(creatingUser.username) }
+
+        createCustomerAttempt.shouldBeLeft()
+    }
+
+    @Test
+    fun `it should attach a picture to a customer at the moment of creation`() {
+        val expectedPicture = Picture(PictureID("anyId"), "")
+
+        val customerWithPicture = expectedCustomer.copy(
+                picture = expectedPicture
+        )
+
+        every { customerRepository.save(customerWithPicture) } returns customerWithPicture
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
+        every { pictureRepository.findById(expectedPicture.pictureId) } returns Optional.of(expectedPicture)
+
+        every { idGenerator.generate() } returns "testId"
+
+        val createdCustomer = service.createCustomer(
+                customerWithPicture.name,
+                customerWithPicture.surname,
+                creatingUser.username,
+                customerWithPicture.picture?.pictureId)
+
+        verify { customerRepository.save(customerWithPicture) }
+        verify { pictureRepository.findById(expectedPicture.pictureId) }
+
+        assertEquals(customerWithPicture, (createdCustomer as Either.Right).b)
+    }
+
+    @Test
+    fun `it should return an error when attaching a picture that does not exist`() {
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
+        every { pictureRepository.findById(any()) } returns Optional.empty()
+
+        val createCustomerAttempt = service.createCustomer(
+                expectedCustomer.name,
+                expectedCustomer.surname,
+                creatingUser.username,
+                PictureID("1234"))
+
+        verify { pictureRepository.findById(PictureID("1234")) }
 
         createCustomerAttempt.shouldBeLeft()
     }

@@ -33,7 +33,6 @@ class CustomerControllerTest {
     @Test
     @WithMockUser(roles = ["USER"], username = "testUser")
     fun `it should be able to create a customer with correct parameters and hold a reference to the user that created it`() {
-        val creatingUser = User(UserID("anyUserId"), "testUser", "user", listOf(Role.ROLE_USER))
         val testCustomer = Customer(
                 CustomerID("anyId"),
                 "testCustomer",
@@ -41,7 +40,8 @@ class CustomerControllerTest {
                 creatingUser
         )
 
-        whenever(customerService.createCustomer(any(), any(), any())).thenReturn(Either.right(testCustomer))
+        whenever(customerService.createCustomer(testCustomer.name, testCustomer.surname, creatingUser.username))
+                .thenReturn(Either.right(testCustomer))
 
         val validCreateCustomerRequestBody = JSONObject()
                 .put("name", testCustomer.name)
@@ -95,6 +95,42 @@ class CustomerControllerTest {
 
         mockMvc.perform(request)
                 .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"], username = "testUser")
+    fun `it should attach picture to customer at the moment of creating when providing a valid picture id`() {
+        val expectedPicture = Picture(PictureID("any"), "")
+        val testCustomer = Customer(
+                CustomerID("anyId"),
+                "testCustomer",
+                "anySurname",
+                creatingUser,
+                picture = expectedPicture
+        )
+
+        whenever(customerService.createCustomer(
+                testCustomer.name, testCustomer.surname,
+                creatingUser.username, expectedPicture.pictureId
+        )).thenReturn(Either.right(testCustomer))
+
+        val validCreateCustomerRequestBody = JSONObject()
+                .put("name", testCustomer.name)
+                .put("surname", testCustomer.surname)
+                .put("pictureId", testCustomer.picture?.pictureId?.id)
+
+        val request = MockMvcRequestBuilders
+                .post("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validCreateCustomerRequestBody.toString())
+
+        val expectedCustomerPictureUri = "/customers/${testCustomer.customerId.id}/picture"
+
+        mockMvc.perform(request)
+                .andExpect(status().isCreated)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.pictureUri").value(expectedCustomerPictureUri))
     }
 
     @Test
@@ -263,4 +299,5 @@ class CustomerControllerTest {
                 .andExpect(status().isNotFound)
     }
 
+    val creatingUser = User(UserID("anyUserId"), "testUser", "user", listOf(Role.ROLE_USER))
 }

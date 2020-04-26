@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import shop.model.Customer
 import shop.model.CustomerID
+import shop.model.PictureID
 import shop.service.CustomerService
 import java.security.Principal
 
@@ -26,7 +27,12 @@ class CustomerController {
             @RequestBody request: CreateCustomerRequest,
             requestingUserPrincipal: Principal
     ): ResponseEntity<CustomerResponse> {
-        val createCustomerAttempt = customerService.createCustomer(request.name, request.surname, requestingUserPrincipal.name)
+        val createCustomerAttempt = customerService.createCustomer(
+                request.name,
+                request.surname,
+                requestingUserPrincipal.name,
+                request.pictureId?.let { PictureID(it) }
+        )
 
         when (createCustomerAttempt) {
             is Either.Right ->
@@ -118,7 +124,8 @@ class CustomerController {
 
 data class CreateCustomerRequest(
         val name: String,
-        val surname: String
+        val surname: String,
+        val pictureId: String?
 )
 
 data class CustomerResponse(
@@ -126,7 +133,8 @@ data class CustomerResponse(
         val surname: String,
         val customerId: String,
         val createdBy: UserResponse,
-        val lastUpdatedBy: UserResponse?
+        val lastUpdatedBy: UserResponse?,
+        val pictureUri: String?
 ) {
     companion object {
         fun fromCustomer(customer: Customer) =
@@ -135,8 +143,11 @@ data class CustomerResponse(
                         customer.surname,
                         customer.customerId.id,
                         UserResponse.fromUser(customer.createdBy),
-                        customer.lastUpdatedBy?.let { UserResponse.fromUser(it) }
+                        customer.lastUpdatedBy?.let { UserResponse.fromUser(it) },
+                        customer.picture?.let { buildPictureUri(customer.customerId) }
                 )
+
+        private fun buildPictureUri(customerID: CustomerID) = "/customers/${customerID.id}/picture"
     }
 }
 

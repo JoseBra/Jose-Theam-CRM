@@ -1,10 +1,11 @@
 package shop.model
 
+import org.hibernate.annotations.Cascade
+import org.hibernate.annotations.CascadeType
 import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-@Table(name = "Customer")
 data class Customer(
         @EmbeddedId
         val customerId: CustomerID,
@@ -13,8 +14,12 @@ data class Customer(
         @ManyToOne(fetch = FetchType.LAZY)
         val createdBy: User,
         @ManyToOne(fetch = FetchType.LAZY, optional = true)
-        val lastUpdatedBy: User? = null
+        val lastUpdatedBy: User? = null,
+        @OneToOne(fetch = FetchType.LAZY, optional = true)
+        @JoinColumn(name = "picture_id")
+        @Cascade(CascadeType.DELETE)
+        val picture: Picture? = null
 )
 
 @Embeddable
-data class CustomerID(val id: String): Serializable
+data class CustomerID(val id: String) : Serializable
