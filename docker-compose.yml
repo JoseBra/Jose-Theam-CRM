@@ -2,6 +2,7 @@ version: '3'
 services:
   postgres_db:
     image: "postgres"
+    container_name: "postgres"
     restart: always
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
@@ -9,3 +10,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+
+  shop_crm:
+    image: "shop-crm"
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/shop"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres_db
