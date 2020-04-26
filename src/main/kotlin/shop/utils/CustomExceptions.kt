@@ -24,3 +24,6 @@ class InvalidBase64Picture(message: String) : Exception(message)
 
 @ResponseStatus(HttpStatus.BAD_REQUEST, reason = "Specified picture ID does not exist.")
 class PictureNotFoundException(message: String) : Exception(message)
+
+@ResponseStatus(HttpStatus.NOT_FOUND, reason = "This customer has no picture attached.")
+class CustomerHasNoPictureException(message: String) : Exception(message)

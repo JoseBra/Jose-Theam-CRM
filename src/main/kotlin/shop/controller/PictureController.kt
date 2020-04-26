@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import shop.model.CustomerID
 import shop.model.Picture
 import shop.service.PictureService
 
@@ -34,6 +33,26 @@ class PictureController {
                         .body(PictureResponse.fromPicture(uploadedPictureAttempt.b))
             is Either.Left ->
                 throw uploadedPictureAttempt.a
+        }
+    }
+
+    @GetMapping(
+            "/customers/{customerId}/picture",
+            consumes = ["application/json"],
+            produces = ["application/json"])
+    @PreAuthorize("hasRole('USER')")
+    fun retrieveCustomerPicture(
+            @PathVariable customerId: String
+    ): ResponseEntity<PictureResponse> {
+        val retrievePictureAttempt = pictureService.retrieveCustomerPicture(CustomerID(customerId))
+
+        when (retrievePictureAttempt) {
+            is Either.Right ->
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(PictureResponse.fromPicture(retrievePictureAttempt.b))
+            is Either.Left ->
+                throw retrievePictureAttempt.a
         }
     }
 }

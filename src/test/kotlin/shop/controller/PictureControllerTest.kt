@@ -15,9 +15,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import shop.model.CustomerID
 import shop.model.Picture
 import shop.model.PictureID
 import shop.service.PictureService
+import shop.utils.CustomerHasNoPictureException
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
@@ -51,6 +53,43 @@ class PictureControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.pictureId").value(expectedPicture.pictureId.id))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.imageBase64").value(expectedPicture.imageBase64))
+
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should return customer's picture if both customer and picture exist`() {
+        val testCustomerId = CustomerID("any")
+        val expectedPicture = Picture(PictureID("anyId"), testMimeImageBase64)
+
+        whenever(pictureService.retrieveCustomerPicture(testCustomerId)).thenReturn(Either.right(expectedPicture))
+
+        val request = MockMvcRequestBuilders
+                .get("/customers/${testCustomerId.id}/picture")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(MockMvcResultMatchers.status().isOk)
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pictureId").value(expectedPicture.pictureId.id))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.imageBase64").value(expectedPicture.imageBase64))
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"])
+    fun `it should return 404 when user does not have a picture`() {
+        val testCustomerId = CustomerID("any")
+
+        whenever(pictureService.retrieveCustomerPicture(testCustomerId)).thenReturn(Either.left(CustomerHasNoPictureException("")))
+
+        val request = MockMvcRequestBuilders
+                .get("/customers/${testCustomerId.id}/picture")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+                .andExpect(MockMvcResultMatchers.status().isNotFound)
 
     }
 
