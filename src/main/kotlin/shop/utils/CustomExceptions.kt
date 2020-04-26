@@ -18,3 +18,6 @@ class UserAlreadyExists(message: String) : Exception(message)
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED, reason = "Requesting user does not exist in the system.")
 class UserNotFoundException(message: String) : Exception(message)
+
+@ResponseStatus(HttpStatus.BAD_REQUEST, reason = "Input encoded picture could not be validated as Base64 content.")
+class InvalidBase64Picture(message: String) : Exception(message)
