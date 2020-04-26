@@ -60,7 +60,8 @@ class CustomerController {
                 CustomerID(id),
                 request.name,
                 request.surname,
-                requestingUserPrincipal.name
+                requestingUserPrincipal.name,
+                request.pictureId?.let { PictureID(it) }
         )
 
         when (updateCustomerAttempt) {

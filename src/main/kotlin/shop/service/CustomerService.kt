@@ -62,10 +62,17 @@ class CustomerService(
             customerId: CustomerID,
             newName: String,
             newSurname: String,
-            updatingUserUsername: String): Either<Exception, Customer> {
+            updatingUserUsername: String,
+            newPictureID: PictureID? = null
+    ): Either<Exception, Customer> {
 
         val updatingUser = userRepository.findByUsername(updatingUserUsername)
                 ?: return Either.left(UserNotFoundException("Trying to create a customer with a user that does not exist."))
+
+        val pictureToAttach = newPictureID?.let {
+            loadPicture(it)
+                    ?: return Either.left(PictureNotFoundException("Trying to use a picture with id ${newPictureID.id} that does not exist."))
+        }
 
         val foundCustomer = customerRepository.findById(customerId)
 
@@ -73,7 +80,8 @@ class CustomerService(
             Either.right(customerRepository.save(foundCustomer.get().copy(
                     name = newName,
                     surname = newSurname,
-                    lastUpdatedBy = updatingUser
+                    lastUpdatedBy = updatingUser,
+                    picture = pictureToAttach
             )))
         } else {
             Either.left(CustomerNotFoundException("Customer with id ${customerId.id} not found."))

@@ -246,10 +246,47 @@ class CustomerControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = ["USER"])
+    @WithMockUser(roles = ["USER"], username = "testUser")
+    fun `it should attach a picture to a customer on a put request if picture id is specified`() {
+        val expectedPicture = Picture(PictureID("anyPictureId"), "")
+
+        val expectedCustomer = Customer(CustomerID("anyId"), "testCustomer", "anySurname",
+                creatingUser, creatingUser, expectedPicture)
+
+        whenever(customerService.updateCustomer(
+                expectedCustomer.customerId, expectedCustomer.name,
+                expectedCustomer.surname, creatingUser.username,
+                expectedPicture.pictureId)
+        )
+                .thenReturn(Either.right(expectedCustomer))
+
+        val validUpdateRequestBody = JSONObject()
+                .put("name", expectedCustomer.name)
+                .put("surname", expectedCustomer.surname)
+                .put("pictureId", expectedPicture.pictureId.id)
+
+        val request = MockMvcRequestBuilders
+                .put("/customers/${expectedCustomer.customerId.id}")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validUpdateRequestBody.toString())
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.pictureUri")
+                        .value("/customers/${expectedCustomer.customerId.id}/picture"))
+    }
+
+    @Test
+    @WithMockUser(roles = ["USER"], username = "testUser")
     fun `it should return 404 when updating a Customer that does not exist`() {
         whenever(
-                customerService.updateCustomer(any(), any(), any(), any())
+                customerService.updateCustomer(
+                        CustomerID("1234"),
+                        "name",
+                        "surname",
+                        creatingUser.username)
         )
                 .thenReturn(Either.left(CustomerNotFoundException("")))
 

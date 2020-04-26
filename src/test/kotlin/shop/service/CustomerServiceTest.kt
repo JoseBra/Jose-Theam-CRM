@@ -116,6 +116,34 @@ class CustomerServiceTest {
     }
 
     @Test
+    fun `it should attach a picture to a customer when updating it and picture id is specified`() {
+        val expectedPicture = Picture(PictureID("any"), "")
+        val expectedUpdatedCustomer = expectedCustomer.copy(
+                name = "updatedName",
+                surname = "updatedSurname",
+                lastUpdatedBy = creatingUser,
+                picture = expectedPicture
+        )
+
+        every { customerRepository.findById(expectedCustomer.customerId) } returns Optional.of(expectedCustomer)
+        every { pictureRepository.findById(expectedPicture.pictureId) } returns Optional.of(expectedPicture)
+        every { customerRepository.save(expectedUpdatedCustomer) } returns expectedUpdatedCustomer
+        every { userRepository.findByUsername(creatingUser.username) } returns creatingUser
+
+        val updatedCustomer = service.updateCustomer(
+                expectedCustomer.customerId,
+                expectedUpdatedCustomer.name,
+                expectedUpdatedCustomer.surname,
+                creatingUser.username,
+                expectedPicture.pictureId)
+
+        verify { customerRepository.save(expectedUpdatedCustomer) }
+        verify { pictureRepository.findById(expectedPicture.pictureId) }
+
+        assertEquals(expectedUpdatedCustomer, (updatedCustomer as Either.Right).b)
+    }
+
+    @Test
     fun `it should list all customers`() {
         every { customerRepository.findAll() } returns listOf(expectedCustomer, expectedCustomer)
 
